@@ -1,13 +1,6 @@
-from bs4 import BeautifulSoup
 import requests
-import os
-import re
 import lyricsgenius as lg
-
-# GENIUS CREDENTIALS
-myClientSecret = 'oGRhL_Be59r5sNJ6MRuQ_KCqmYCQ0RYhWo87ukY0etmN0v6qOIPs6LQO9xgAXyGSB8gnULruEAkbtlk7fir4aQ'
-myClientID = 'fXN02nxU6NwMc9wKtfE-Zltz40tvzlMAMVo63BFt4QeXz7uC5sMvPRcpWpVgkmJY'
-myAccessToken = 'Qc5VC8btnP5JS4GLgoR6j1SnGWqJafxshVymsRHNff_Gdmk-CO5sJuefbtFCfTlO'
+from data.credentials import myAccessToken
 
 
 def request_query_info(query, page):
@@ -49,25 +42,6 @@ def request_song_url(artist_name, song_name, song_cap, print_response=False):
     return song_url
 
 
-# Get song lyrics from song url
-def scrape_song_lyrics(url):
-    page = requests.get(url)
-    html = BeautifulSoup(page.text, 'html.parser')
-
-    # print(html)
-    try:
-        print(html.find_all('br').get_text())
-        lyrics = html.find('div', class_='lyrics').get_text()
-        # remove indentifiers like chorus, verse, ...
-        lyrics = re.sub(r'[\(\[].*?[\)\]]', '', lyrics)
-        # remove empty lines
-        lyrics = os.linesep.join([s for s in lyrics.splitlines() if s])
-        return lyrics
-    finally:
-        print("Could not find lyrics for {}".format(url))
-        return ""
-
-
 # Save lyrics to file
 def save_lyrics_to_file(artist_name, song_name, genre_name, lyrics, index):
     f = open('../data/lyrics/' + genre_name.lower() + '.txt', 'ab+')
@@ -82,36 +56,7 @@ def save_lyrics_to_file(artist_name, song_name, genre_name, lyrics, index):
     print("Finished {}/4000\n".format(index + 1))
 
 
-# Search songs by name and artist, extract lyrics and save to file
-def scrape_extract_save(artist_name, song_name, genre_name):
-    # Song_url is in array, use song_url[0] when accessing
-    song_url = request_song_url(artist_name=artist_name,
-                                song_name=song_name,
-                                song_cap=1,
-                                print_response=False)
-    # Check if list is empty
-    if not song_url:
-        print('List is empty, could not find song {} by {}'.format(song_name, artist_name))
-        f = open('../data/lyrics/songs_not_found.txt', 'a+')
-        # Move read cursor to the start of file
-        f.seek(0)
-        # If file is not empty then append '\n'
-        if len(f.read(100)) > 0:
-            f.write("\n")
-        f.write(str(song_name) + ' by ' + str(artist_name))
-        f.close()
-        return
-
-    song_lyrics = scrape_song_lyrics(song_url[0])
-    if song_lyrics == "":
-        return
-    save_lyrics_to_file(artist_name=artist_name,
-                        song_name=song_name,
-                        genre_name=genre_name,
-                        lyrics=song_lyrics)
-
-
-genius = lg.Genius('Qc5VC8btnP5JS4GLgoR6j1SnGWqJafxshVymsRHNff_Gdmk-CO5sJuefbtFCfTlO',
+genius = lg.Genius(myAccessToken,
                    skip_non_songs=True,
                    excluded_terms=["(Remix)", "(Live)"],
                    remove_section_headers=True)
