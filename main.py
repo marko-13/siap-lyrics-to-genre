@@ -1,7 +1,9 @@
 import lyricsgenius as lg
+from data.credentials import myAccessToken
+
 
 if __name__ == "__main__":
-    genius = lg.Genius('Qc5VC8btnP5JS4GLgoR6j1SnGWqJafxshVymsRHNff_Gdmk-CO5sJuefbtFCfTlO',
+    genius = lg.Genius(myAccessToken,
                        skip_non_songs=True,
                        excluded_terms=["(Remix)", "(Live)"],
                        remove_section_headers=True)
