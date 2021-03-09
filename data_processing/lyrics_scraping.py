@@ -1,6 +1,7 @@
 import requests
 import lyricsgenius as lg
 from data.credentials import myAccessToken
+import csv
 
 
 def request_query_info(query, page):
@@ -44,6 +45,12 @@ def request_song_url(artist_name, song_name, song_cap, print_response=False):
 
 # Save lyrics to file
 def save_lyrics_to_file(artist_name, song_name, genre_name, lyrics, index):
+    # delete ; whereever it appears
+    lyrics = lyrics.replace(";", "")
+    lyrics = lyrics.replace("\n", " ")
+    artist_name = artist_name.replace(";", "")
+    song_name = song_name.replace(";", "")
+
     f = open('../data/lyrics/' + genre_name.lower() + '.txt', 'ab+')
     # Move read cursor to the start of file
 
@@ -51,6 +58,11 @@ def save_lyrics_to_file(artist_name, song_name, genre_name, lyrics, index):
     text_to_write = artist_name + '\n' + song_name + '\n' + lyrics
     f.write(text_to_write.encode('utf-8'))
     f.close()
+
+    # SAVE FILE TO CSV
+    with open('../data/lyrics_csv/' + genre_name.lower() + '.csv', 'a+', encoding='utf-8') as csv_f:
+        csv_writer = csv.writer(csv_f, delimiter=';')
+        csv_writer.writerow([artist_name, song_name, lyrics])
 
     print("Added lyrics for song {} by {}".format(song_name, artist_name))
     print("Finished {}/4000\n".format(index + 1))

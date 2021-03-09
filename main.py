@@ -1,6 +1,6 @@
 import lyricsgenius as lg
 from data.credentials import myAccessToken
-
+import csv
 
 if __name__ == "__main__":
     genius = lg.Genius(myAccessToken,
